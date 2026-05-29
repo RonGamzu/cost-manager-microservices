@@ -1,0 +1,54 @@
+envVarGroups:
+  - name: shared-config
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+
+services:
+  - type: web
+    name: logs-service
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node logs-service/index.js
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+    envVarGroups:
+      - shared-config
+
+  - type: web
+    name: users-service
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node users-service/index.js
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+    envVarGroups:
+      - shared-config
+
+  - type: web
+    name: costs-service
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node costs-service/index.js
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+    envVarGroups:
+      - shared-config
+
+  - type: web
+    name: about-service
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node about-service/index.js
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+    envVarGroups:
+      - shared-config

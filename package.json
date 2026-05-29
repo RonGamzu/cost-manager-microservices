@@ -1,0 +1,25 @@
+{
+  "name": "cost-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cost Manager microservices final project",
+  "workspaces": [
+    "logs-service",
+    "users-service",
+    "costs-service",
+    "about-service"
+  ],
+  "scripts": {
+    "seed": "node seed.js",
+    "test:logs": "npm test --workspace=logs-service",
+    "test:users": "npm test --workspace=users-service",
+    "test:costs": "npm test --workspace=costs-service",
+    "test:about": "npm test --workspace=about-service",
+    "test": "npm run test:about && npm run test:logs && npm run test:users && npm run test:costs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.4.0",
+    "pino": "^9.1.0"
+  }
+}
