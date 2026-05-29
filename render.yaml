@@ -1,9 +1,3 @@
-envVarGroups:
-  - name: shared-config
-    envVars:
-      - key: MONGODB_URI
-        sync: false
-
 services:
   - type: web
     name: logs-service
@@ -14,8 +8,8 @@ services:
     envVars:
       - key: HOST
         value: 0.0.0.0
-    envVarGroups:
-      - shared-config
+      - key: MONGODB_URI
+        sync: false
 
   - type: web
     name: users-service
@@ -26,8 +20,8 @@ services:
     envVars:
       - key: HOST
         value: 0.0.0.0
-    envVarGroups:
-      - shared-config
+      - key: MONGODB_URI
+        sync: false
 
   - type: web
     name: costs-service
@@ -38,8 +32,8 @@ services:
     envVars:
       - key: HOST
         value: 0.0.0.0
-    envVarGroups:
-      - shared-config
+      - key: MONGODB_URI
+        sync: false
 
   - type: web
     name: about-service
@@ -50,5 +44,5 @@ services:
     envVars:
       - key: HOST
         value: 0.0.0.0
-    envVarGroups:
-      - shared-config
+      - key: MONGODB_URI
+        sync: false
