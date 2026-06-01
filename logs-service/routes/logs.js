@@ -17,6 +17,7 @@ const buildLogsRouter = (logger) => {
             const logs = await Log.find({}, { _id: 0 }).sort({ time: 1 });
             res.status(200).json(logs);
         } catch (error) {
+            logger.error({ endpoint: '/api/logs', service: 'logs', err: error.message }, 'unexpected error fetching logs');
             res.status(500).json({
                 id: 500,
                 message: error.message

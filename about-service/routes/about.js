@@ -26,6 +26,7 @@ const buildAboutRouter = (logger) => {
             // send only the two required properties per member
             res.status(200).json(teamMembers);
         } catch (error) {
+            logger.error({ endpoint: '/api/about', service: 'about', err: error.message }, 'unexpected error in about endpoint');
             // unified error shape used across every service
             res.status(500).json({
                 id: 500,
