@@ -5,8 +5,7 @@ const express = require('express');
 // be empty except for the seed user
 const teamMembers = [
     { first_name: 'Ron', last_name: 'Gam Ze Letova' },
-    { first_name: 'Dvir', last_name: 'Bardugo' },
-    { first_name: 'Maor', last_name: 'Maimon' }
+    { first_name: 'Rotem', last_name: 'Bar' }
 ];
 
 /**

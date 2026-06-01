@@ -100,11 +100,11 @@ The Express applications are configured with `strict routing` disabled,
 so both `/api/about` and `/api/about/` reach the same handler.
 
 Fill the four base URLs at the top of the Python script with the four
-service addresses, for example:
+service addresses. The live Render URLs are:
 
 ```
-a = 'http://localhost:3001'   # logs service
-b = 'http://localhost:3002'   # users service
-c = 'http://localhost:3003'   # costs service
-d = 'http://localhost:3004'   # about service
+a = 'https://logs-service-bkni.onrender.com'   # logs service
+b = 'https://users-service-y2xk.onrender.com'  # users service
+c = 'https://costs-service-mxnb.onrender.com'  # costs service
+d = 'https://about-service-e2gh.onrender.com'  # about service
 ```
