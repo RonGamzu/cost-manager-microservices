@@ -81,35 +81,49 @@ const buildCostsRouter = (logger) => {
             const body = req.body || {};
             const description = body.description;
             const category = body.category;
-            const userid = Number(body.userid);
-            const sum = Number(body.sum);
-            // basic shape validation before any database access
             if (typeof description !== 'string' || description.length === 0) {
-                res.status(400).json({
-                    id: 400,
-                    message: 'description is required'
-                });
+                logger.warn({ endpoint: '/api/add', service: 'costs' }, 'description is required');
+                res.status(400).json({ id: 400, message: 'description is required' });
+                return;
+            }
+            if (category === undefined || category === null) {
+                logger.warn({ endpoint: '/api/add', service: 'costs' }, 'category is required');
+                res.status(400).json({ id: 400, message: 'category is required' });
                 return;
             }
             if (!allowedCategories.includes(category)) {
+                logger.warn({ endpoint: '/api/add', service: 'costs', category }, `category must be one of ${allowedCategories.join(', ')}`);
                 res.status(400).json({
                     id: 400,
                     message: `category must be one of ${allowedCategories.join(', ')}`
                 });
                 return;
             }
-            if (!Number.isFinite(userid)) {
-                res.status(400).json({
-                    id: 400,
-                    message: 'userid must be a number'
-                });
+            if (body.userid === undefined || body.userid === null) {
+                logger.warn({ endpoint: '/api/add', service: 'costs' }, 'userid is required');
+                res.status(400).json({ id: 400, message: 'userid is required' });
                 return;
             }
-            if (!Number.isFinite(sum) || sum < 0) {
-                res.status(400).json({
-                    id: 400,
-                    message: 'sum must be a non negative number'
-                });
+            const userid = Number(body.userid);
+            if (!Number.isFinite(userid)) {
+                logger.warn({ endpoint: '/api/add', service: 'costs' }, 'userid must be a number');
+                res.status(400).json({ id: 400, message: 'userid must be a number' });
+                return;
+            }
+            if (body.sum === undefined || body.sum === null) {
+                logger.warn({ endpoint: '/api/add', service: 'costs' }, 'sum is required');
+                res.status(400).json({ id: 400, message: 'sum is required' });
+                return;
+            }
+            const sum = Number(body.sum);
+            if (!Number.isFinite(sum)) {
+                logger.warn({ endpoint: '/api/add', service: 'costs' }, 'sum must be a valid number');
+                res.status(400).json({ id: 400, message: 'sum must be a valid number' });
+                return;
+            }
+            if (sum < 0) {
+                logger.warn({ endpoint: '/api/add', service: 'costs', sum }, 'sum cannot be a negative number');
+                res.status(400).json({ id: 400, message: 'sum cannot be a negative number' });
                 return;
             }
             // edge case 2: default the date to "now" when none was sent
@@ -118,6 +132,7 @@ const buildCostsRouter = (logger) => {
             if (typeof rawDate === 'string' && rawDate.length > 0) {
                 const parsed = new Date(rawDate);
                 if (Number.isNaN(parsed.getTime())) {
+                    logger.warn({ endpoint: '/api/add', service: 'costs', date: rawDate }, 'date is not a valid timestamp');
                     res.status(400).json({
                         id: 400,
                         message: 'date is not a valid timestamp'
@@ -130,6 +145,7 @@ const buildCostsRouter = (logger) => {
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             if (costDate.getTime() < startOfToday.getTime()) {
+                logger.warn({ endpoint: '/api/add', service: 'costs', costDate }, 'cost date must not be in the past');
                 res.status(400).json({
                     id: 400,
                     message: 'cost date must not be in the past'
@@ -139,6 +155,7 @@ const buildCostsRouter = (logger) => {
             // edge case 1: confirm the user actually exists
             const userExists = await User.findOne({ id: userid });
             if (userExists === null) {
+                logger.warn({ endpoint: '/api/add', service: 'costs', userid }, `user with id ${userid} does not exist`);
                 res.status(400).json({
                     id: 400,
                     message: `user with id ${userid} does not exist`
@@ -161,6 +178,7 @@ const buildCostsRouter = (logger) => {
                 createdAt: created.createdAt
             });
         } catch (error) {
+            logger.error({ endpoint: '/api/add', service: 'costs', err: error.message }, 'unexpected error adding cost');
             res.status(500).json({
                 id: 500,
                 message: error.message
@@ -190,15 +208,40 @@ const buildCostsRouter = (logger) => {
                 year,
                 month
             }, 'monthly report');
-            // strict input validation at the system boundary
-            if (!Number.isFinite(userid) || !Number.isFinite(year) || !Number.isFinite(month)) {
+            if (!Number.isFinite(userid)) {
+                logger.warn({ endpoint: '/api/report', service: 'costs' }, 'id query parameter is required and must be a number');
                 res.status(400).json({
                     id: 400,
-                    message: 'id, year and month query parameters are required'
+                    message: 'id query parameter is required and must be a number'
+                });
+                return;
+            }
+            if (!Number.isFinite(year)) {
+                logger.warn({ endpoint: '/api/report', service: 'costs', userid }, 'year query parameter is required and must be a number');
+                res.status(400).json({
+                    id: 400,
+                    message: 'year query parameter is required and must be a number'
+                });
+                return;
+            }
+            if (year <= 0) {
+                logger.warn({ endpoint: '/api/report', service: 'costs', userid, year }, 'year must be a positive number');
+                res.status(400).json({
+                    id: 400,
+                    message: 'year must be a positive number'
+                });
+                return;
+            }
+            if (!Number.isFinite(month)) {
+                logger.warn({ endpoint: '/api/report', service: 'costs', userid, year }, 'month query parameter is required and must be a number');
+                res.status(400).json({
+                    id: 400,
+                    message: 'month query parameter is required and must be a number'
                 });
                 return;
             }
             if (month < 1 || month > 12) {
+                logger.warn({ endpoint: '/api/report', service: 'costs', userid, year, month }, 'month must be between 1 and 12');
                 res.status(400).json({
                     id: 400,
                     message: 'month must be between 1 and 12'
@@ -248,6 +291,7 @@ const buildCostsRouter = (logger) => {
                 costs: grouped
             });
         } catch (error) {
+            logger.error({ endpoint: '/api/report', service: 'costs', err: error.message }, 'unexpected error generating report');
             res.status(500).json({
                 id: 500,
                 message: error.message

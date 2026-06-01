@@ -5,8 +5,7 @@ const express = require('express');
 // be empty except for the seed user
 const teamMembers = [
     { first_name: 'Ron', last_name: 'Gam Ze Letova' },
-    { first_name: 'Dvir', last_name: 'Bardugo' },
-    { first_name: 'Maor', last_name: 'Maimon' }
+    { first_name: 'Rotem', last_name: 'Bar' }
 ];
 
 /**
@@ -27,6 +26,7 @@ const buildAboutRouter = (logger) => {
             // send only the two required properties per member
             res.status(200).json(teamMembers);
         } catch (error) {
+            logger.error({ endpoint: '/api/about', service: 'about', err: error.message }, 'unexpected error in about endpoint');
             // unified error shape used across every service
             res.status(500).json({
                 id: 500,

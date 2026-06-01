@@ -23,17 +23,25 @@ const buildUsersRouter = (logger) => {
             const id = Number(body.id);
             const firstName = body.first_name;
             const lastName = body.last_name;
-            // basic shape validation before touching the database
-            if (!Number.isFinite(id) || typeof firstName !== 'string' || typeof lastName !== 'string') {
-                res.status(400).json({
-                    id: 400,
-                    message: 'id, first_name and last_name are required'
-                });
+            if (!Number.isFinite(id)) {
+                logger.warn({ endpoint: '/api/add', service: 'users' }, 'id is required and must be a number');
+                res.status(400).json({ id: 400, message: 'id is required and must be a number' });
+                return;
+            }
+            if (typeof firstName !== 'string' || firstName.trim().length === 0) {
+                logger.warn({ endpoint: '/api/add', service: 'users' }, 'first_name is required');
+                res.status(400).json({ id: 400, message: 'first_name is required' });
+                return;
+            }
+            if (typeof lastName !== 'string' || lastName.trim().length === 0) {
+                logger.warn({ endpoint: '/api/add', service: 'users' }, 'last_name is required');
+                res.status(400).json({ id: 400, message: 'last_name is required' });
                 return;
             }
             // edge case 5: reject duplicate custom ids
             const existing = await User.findOne({ id });
             if (existing !== null) {
+                logger.warn({ endpoint: '/api/add', service: 'users', id }, `user with id ${id} already exists`);
                 res.status(400).json({
                     id: 400,
                     message: `user with id ${id} already exists`
@@ -62,6 +70,7 @@ const buildUsersRouter = (logger) => {
                 birthday: created.birthday
             });
         } catch (error) {
+            logger.error({ endpoint: '/api/add', service: 'users', err: error.message }, 'unexpected error adding user');
             res.status(500).json({
                 id: 500,
                 message: error.message
@@ -77,6 +86,7 @@ const buildUsersRouter = (logger) => {
             const users = await User.find({}, { _id: 0, id: 1, first_name: 1, last_name: 1, birthday: 1 });
             res.status(200).json(users);
         } catch (error) {
+            logger.error({ endpoint: '/api/users', service: 'users', err: error.message }, 'unexpected error listing users');
             res.status(500).json({
                 id: 500,
                 message: error.message
@@ -94,6 +104,7 @@ const buildUsersRouter = (logger) => {
             const requestedId = Number(req.params.id);
             logger.info({ endpoint: `/api/users/${requestedId}`, service: 'users' }, 'get user');
             if (!Number.isFinite(requestedId)) {
+                logger.warn({ endpoint: '/api/users/:id', service: 'users' }, 'id must be a number');
                 res.status(400).json({
                     id: 400,
                     message: 'id must be a number'
@@ -103,6 +114,7 @@ const buildUsersRouter = (logger) => {
             // look the user up by the custom id, not the mongo _id
             const user = await User.findOne({ id: requestedId });
             if (user === null) {
+                logger.warn({ endpoint: `/api/users/${requestedId}`, service: 'users', requestedId }, `user with id ${requestedId} was not found`);
                 res.status(404).json({
                     id: 404,
                     message: `user with id ${requestedId} was not found`
@@ -123,6 +135,7 @@ const buildUsersRouter = (logger) => {
                 total
             });
         } catch (error) {
+            logger.error({ endpoint: '/api/users/:id', service: 'users', err: error.message }, 'unexpected error getting user');
             res.status(500).json({
                 id: 500,
                 message: error.message
